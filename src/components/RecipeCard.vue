@@ -30,13 +30,35 @@
         </div>
 
         <div class="p-2 md:p-6">
-            <!-- 食材列表 -->
-            <div class="mb-4">
-                <h4 class="text-sm font-bold text-dark-800 mb-2 flex items-center gap-1">🥬 所需食材</h4>
-                <div class="flex flex-wrap gap-1">
-                    <span v-for="ingredient in recipe.ingredients" :key="ingredient" class="bg-yellow-400 text-dark-800 px-2 py-1 rounded text-xs font-medium border border-black">
-                        {{ ingredient }}
-                    </span>
+            <!-- 食材列表和菜品图片 -->
+            <div class="mb-4 flex flex-col md:flex-row gap-4">
+                <!-- 菜品图片 - 只在图片生成完成或失败时显示 -->
+                <div v-if="generatedImage || imageError" class="md:w-1/3 flex-shrink-0">
+                    <!-- 错误提示 -->
+                    <div v-if="imageError" class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3 h-full flex items-center justify-center">
+                        {{ imageError }}
+                    </div>
+
+                    <!-- 生成的图片 -->
+                    <div v-else class="h-full">
+                        <img
+                            :src="generatedImage?.url"
+                            :alt="`${props.recipe.name}效果图`"
+                            class="w-full h-full object-cover rounded-lg border-2 border-[#0A0910] cursor-pointer transition-all duration-300 hover:brightness-110 hover:scale-[1.02]"
+                            @error="handleImageError"
+                            @click="openImageModal"
+                        />
+                    </div>
+                </div>
+
+                <!-- 食材列表 - 图片未生成时占满宽度 -->
+                <div :class="{ 'md:flex-1': generatedImage || imageError, 'w-full': !generatedImage && !imageError }">
+                    <h4 class="text-sm font-bold text-dark-800 mb-2 flex items-center gap-1">🥬 所需食材</h4>
+                    <div class="flex flex-wrap gap-1">
+                        <span v-for="ingredient in recipe.ingredients" :key="ingredient" class="bg-yellow-400 text-dark-800 px-2 py-1 rounded text-xs font-medium border border-black">
+                            {{ ingredient }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -183,63 +205,6 @@
                     </button>
                 </div> -->
             </div>
-
-            <!-- 效果图区域 -->
-            <div class="mt-4 pt-4 border-t border-gray-200">
-                <h4 class="text-sm font-bold text-dark-800 mb-3 flex items-center gap-1">🖼️ 菜品效果图</h4>
-
-                <!-- 加载状态 -->
-                <div v-if="isGeneratingImage" class="bg-gray-50 border-2 border-gray-300 rounded-lg p-6 text-center">
-                    <div class="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto mb-3"></div>
-                    <h5 class="text-sm font-bold text-dark-800 mb-1">AI画师正在创作中...</h5>
-                    <p class="text-gray-600 text-xs">{{ imageLoadingText }}</p>
-                </div>
-
-                <!-- 错误提示 -->
-                <div v-else-if="imageError" class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3">
-                    {{ imageError }}
-                </div>
-
-                <!-- 生成的图片 -->
-                <div v-else-if="generatedImage" class="mb-3">
-                    <img
-                        :src="generatedImage.url"
-                        :alt="`${recipe.name}效果图`"
-                        class="w-full object-cover rounded-lg border-2 border-[#0A0910] cursor-pointer transition-all duration-300 hover:brightness-110 hover:scale-[1.02]"
-                        @error="handleImageError"
-                        @click="openImageModal"
-                    />
-                </div>
-
-                <!-- 效果图空状态 - 包含生成按钮 -->
-                <div v-else class="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:bg-gray-50 transition-colors">
-                    <div class="text-gray-400 text-2xl mb-3">📷</div>
-                    <p class="text-gray-500 text-xs mb-4">暂无菜品效果图</p>
-                    <button
-                        @click="generateImage"
-                        :disabled="isGeneratingImage"
-                        class="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded text-xs font-medium border border-black transition-all duration-200 disabled:cursor-not-allowed"
-                    >
-                        <span class="flex items-center gap-1">
-                            <template v-if="isGeneratingImage">
-                                <div class="animate-spin w-3 h-3 border border-white border-t-transparent rounded-full"></div>
-                                生成中...
-                            </template>
-                            <template v-else> ✨ 生成效果图 </template>
-                        </span>
-                    </button>
-                </div>
-
-                <!-- 重新生成按钮 - 当已有图片时显示 -->
-                <div v-if="generatedImage && !isGeneratingImage" class="mt-3 text-center">
-                    <button
-                        @click="generateImage"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium border border-black transition-all duration-200"
-                    >
-                        🔄 重新生成
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -248,7 +213,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onUnmounted } from 'vue'
+import { computed, ref, onUnmounted, watchEffect } from 'vue'
 import type { Recipe } from '@/types'
 import { generateRecipeImage, type GeneratedImage } from '@/services/imageService'
 import { getNutritionAnalysis, getWinePairing } from '@/services/aiService'
@@ -267,9 +232,7 @@ const props = withDefaults(defineProps<Props>(), {
     showFavoriteButton: true
 })
 
-const emit = defineEmits<{
-    favoriteChanged: [isFavorited: boolean]
-}>()
+const emit = defineEmits(['favoriteChanged'])
 const isExpanded = ref(false)
 const isGeneratingImage = ref(false)
 const generatedImage = ref<GeneratedImage | null>(null)
@@ -395,6 +358,13 @@ const generateImage = async () => {
         }
     }
 }
+
+// 自动生成菜品效果图
+watchEffect(() => {
+    if (props.recipe && !generatedImage.value && !isGeneratingImage.value) {
+        generateImage()
+    }
+})
 
 const handleImageError = () => {
     imageError.value = '图片加载失败'
