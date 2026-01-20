@@ -972,17 +972,9 @@ const getRandomInspiration = () => {
     showCustomPrompt.value = true
     const randomIndex = Math.floor(Math.random() * randomInspirations.length)
     const inspiration = randomInspirations[randomIndex]
-
-    if (customPrompt.value.trim()) {
-        const newContent = customPrompt.value.trim() + '，' + inspiration
-        if (newContent.length <= 200) {
-            customPrompt.value = newContent
-        } else {
-            customPrompt.value = inspiration
-        }
-    } else {
-        customPrompt.value = inspiration
-    }
+    
+    // 直接设置新的灵感，删除之前的内容
+    customPrompt.value = inspiration
 }
 
 // 选择菜系
