@@ -9,7 +9,7 @@
                 <div class="bg-pink-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block">
                     <span class="font-bold">1. 输入食材</span>
                 </div>
-                <div class="bg-white border-2 border-[#0A0910] rounded-lg rounded-tl-none p-4 md:p-6 md:pb-10">
+                <div class="bg-white border-2 border-[#0A0910] rounded-lg rounded-tl-none p-4 md:p-6 md:pb-10 overflow-visible">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-4">
                             <span class="text-white text-2xl">🥬</span>
@@ -19,8 +19,8 @@
                         <p class="text-xs text-gray-500 mt-1">支持蔬菜、肉类、调料等 (最多10种)</p>
                     </div>
 
-                    <!-- 食材输入区域 -->
-                    <div class="space-y-4">
+                    <!-- 食材输入区域 - 增加上边距为tooltip留出空间 -->
+                    <div class="space-y-4 pt-6">
                         <!-- 已添加的食材 -->
                         <div v-if="ingredients.length > 0" class="flex flex-wrap gap-2">
                             <div
@@ -36,18 +36,18 @@
                         </div>
 
                         <!-- 输入框 -->
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 relative">
                             <input
                                 v-model="currentIngredient"
                                 @keyup.enter="addIngredient"
                                 placeholder="输入食材名称，按回车添加..."
                                 class="flex-1 p-3 md:p-4 border-2 border-[#0A0910] rounded-lg text-sm md:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
                             />
-                            <div class="relative group">
+                            <div class="group">
                                 <button
                                     @click="triggerImageUpload"
                                     :disabled="isRecognizing"
-                                    class="relative h-full px-3 bg-white hover:bg-gray-50 disabled:bg-gray-100 rounded-lg border-2 border-[#0A0910] transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center min-w-[3rem]"
+                                    class="h-full px-3 bg-white hover:bg-gray-50 disabled:bg-gray-100 rounded-lg border-2 border-[#0A0910] transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center min-w-[3rem]"
                                 >
                                     <!-- 正常状态 -->
                                     <span v-if="!isRecognizing" class="text-2xl" style="margin-top: -8px">📷</span>
@@ -59,13 +59,13 @@
                                     </div>
                                 </button>
 
-                                <!-- 提示文字 -->
+                                <!-- 提示文字 - 相对于整个输入框容器定位 -->
                                 <div
-                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap"
+                                    class="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20"
                                 >
                                     <div class="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl">
                                         拍照识别
-                                        <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                                        <div class="absolute top-full right-3 -mt-1">
                                             <div class="w-2 h-2 bg-gray-900 transform rotate-45"></div>
                                         </div>
                                     </div>
