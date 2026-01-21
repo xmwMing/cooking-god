@@ -36,18 +36,18 @@
                         </div>
 
                         <!-- 输入框 -->
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 items-stretch">
                             <input
                                 v-model="currentIngredient"
                                 @keyup.enter="addIngredient"
                                 placeholder="输入食材名称，按回车添加..."
-                                class="flex-1 p-3 md:p-4 border-2 border-[#0A0910] rounded-lg text-sm md:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                class="flex-1 min-w-0 p-3 md:p-4 border-2 border-[#0A0910] rounded-lg text-sm md:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
                             />
-                            <div class="relative group">
+                            <div class="relative group flex-shrink-0">
                                 <button
                                     @click="triggerImageUpload"
                                     :disabled="isRecognizing"
-                                    class="relative h-full px-3 bg-white hover:bg-gray-50 disabled:bg-gray-100 rounded-lg border-2 border-[#0A0910] transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center min-w-[3rem]"
+                                    class="h-auto px-3 py-3 md:py-4 bg-white hover:bg-gray-50 disabled:bg-gray-100 rounded-lg border-2 border-[#0A0910] transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center min-w-[3rem]"
                                 >
                                     <!-- 正常状态 -->
                                     <span v-if="!isRecognizing" class="text-2xl" style="margin-top: -8px">📷</span>
